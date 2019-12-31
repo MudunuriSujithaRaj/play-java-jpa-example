@@ -12,6 +12,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import static play.libs.Json.toJson;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * The controller keeps all database operations behind the repository, and uses
@@ -47,5 +48,23 @@ public class PersonController extends Controller {
             return ok(toJson(personStream.collect(Collectors.toList())));
         }, ec.current());
     }
+
+    public CompletionStage<Result> addPersonPost() {
+        JsonNode requestJson = request().body().asJson();
+        String userName = requestJson.get("name").asText();
+        Person person = new Person();
+        person.setName(userName);
+        return personRepository.add(person).thenApplyAsync(p -> {
+            return ok("added successfully");
+        }, ec.current());
+    }
+
+    public CompletionStage<Result> deletePerson(String uname) {
+        return personRepository.del(uname).thenApplyAsync(p -> {
+            return ok("deleted successfully");
+        }, ec.current());
+    }
+
+
 
 }

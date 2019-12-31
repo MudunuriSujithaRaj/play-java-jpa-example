@@ -35,6 +35,11 @@ public class JPAPersonRepository implements PersonRepository {
         return supplyAsync(() -> wrap(em -> list(em)), executionContext);
     }
 
+    @Override
+    public CompletionStage<Person> del(String uname) {
+        return supplyAsync(() -> wrap(em -> delete(em, uname)), executionContext);
+    }
+
     private <T> T wrap(Function<EntityManager, T> function) {
         return jpaApi.withTransaction(function);
     }
@@ -47,5 +52,11 @@ public class JPAPersonRepository implements PersonRepository {
     private Stream<Person> list(EntityManager em) {
         List<Person> persons = em.createQuery("select p from Person p", Person.class).getResultList();
         return persons.stream();
+    }
+
+    private Person delete(EntityManager em, String uname) {
+        Person person = em.createQuery("select p from Person p where p.name = :uname",Person.class).setParameter("uname",uname).getSingleResult();
+        em.remove(person);
+        return person;
     }
 }
