@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import models.Person;
 import models.PersonRepository;
 import play.data.FormFactory;
@@ -10,9 +11,9 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-
 import static play.libs.Json.toJson;
-import com.fasterxml.jackson.databind.JsonNode;
+
+import  play.libs.Json;
 
 /**
  * The controller keeps all database operations behind the repository, and uses
@@ -51,9 +52,7 @@ public class PersonController extends Controller {
 
     public CompletionStage<Result> addPersonPost() {
         JsonNode requestJson = request().body().asJson();
-        String userName = requestJson.get("name").asText();
-        Person person = new Person();
-        person.setName(userName);
+        Person person =  Json.fromJson(requestJson, Person.class);
         return personRepository.add(person).thenApplyAsync(p -> {
             return ok("added successfully");
         }, ec.current());
